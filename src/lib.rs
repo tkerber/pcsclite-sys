@@ -7,6 +7,86 @@ use libc::{c_void, c_ulong, c_char, c_long, c_uchar, c_ushort, c_short};
 #[repr(C)]
 pub struct SCardIORequest(c_ulong, c_ulong);
 
+#[repr(C)]
+pub struct SCARD_READERSTATE {
+    pub szReader: *const c_char,
+    pub pvUserData: *mut c_void,
+    pub dwCurrentState: DWORD,
+    pub dwEventState: DWORD,
+    pub cbAtr: DWORD,
+    pub rgbAtr: [c_uchar; MAX_ATR_SIZE],
+}
+
+pub type LPSCARD_READERSTATE = *mut SCARD_READERSTATE;
+
+#[repr(C)]
+pub struct SCARD_IO_REQUEST {
+    pub dwProtocol: c_ulong,
+    pub cbPciLength: c_ulong,
+}
+
+pub type PSCARD_IO_REQUEST = *mut SCARD_IO_REQUEST;
+pub type LPSCARD_IO_REQUEST = *mut SCARD_IO_REQUEST;
+pub type LPCSCARD_IO_REQUEST = *const SCARD_IO_REQUEST;
+
+#[repr(C)]
+pub struct DEVICE_CAPABILITIES {
+    Vendor_Name: LPSTR,
+    IFD_Type: LPSTR,
+    IFD_Version: DWORD,
+    IFD_Serial: LPSTR,
+    IDF_Channel_ID: DWORD,
+    Asynch_Supported: DWORD,
+    Default_Clock: DWORD,
+    Max_Clock: DWORD,
+    Default_Data_Rate: DWORD,
+    Max_Data_Rate: DWORD,
+    Max_IFSD: DWORD,
+    Synch_Supported: DWORD,
+    Power_Mgmt: DWORD,
+    Card_Auth_Devices: DWORD,
+    User_Auth_Device: DWORD,
+    Mechanics_Supported: DWORD,
+    Vendor_Features: DWORD,
+}
+
+pub type PDEVICE_CAPABILITIES = *mut DEVICE_CAPABILITIES;
+
+#[repr(C)]
+pub struct ICC_STATE {
+    ICC_Presence: UCHAR,
+    ICC_Interface_Status: UCHAR,
+    ATR: [UCHAR; MAX_ATR_SIZE],
+    ICC_Type: UCHAR,
+}
+
+pub type PICC_STATE = *mut ICC_STATE;
+
+#[repr(C)]
+pub struct PROTOCOL_OPTIONS {
+    Protocol_Type: DWORD,
+    Current_Clock: DWORD,
+    Current_F: DWORD,
+    Current_D: DWORD,
+    Current_N: DWORD,
+    Current_W: DWORD,
+    Current_IFSC: DWORD,
+    Current_IFSD: DWORD,
+    Current_BWT: DWORD,
+    Current_CWT: DWORD,
+    Current_EBC: DWORD,
+}
+
+pub type PPROTOCOL_OPTIONS = *mut PROTOCOL_OPTIONS;
+
+#[repr(C)]
+pub struct SCARD_IO_HEADER {
+    Protocol: DWORD,
+    Length: DWORD,
+}
+
+pub type PSCARD_IO_HEADER = *mut SCARD_IO_HEADER;
+
 #[cfg(target_os="macos")]
 pub type BYTE = u8;
 #[cfg(target_os="macos")]
@@ -58,29 +138,9 @@ pub type SCARDHANDLE = LONG;
 pub type PSCARDHANDLE = *mut SCARDHANDLE;
 pub type LPSCARDHANDLE = *mut SCARDHANDLE;
 
+pub type RESPONSECODE = c_long;
+
 pub const MAX_ATR_SIZE: usize = 33;
-
-#[repr(C)]
-pub struct SCARD_READERSTATE {
-    pub szReader: *const c_char,
-    pub pvUserData: *mut c_void,
-    pub dwCurrentState: DWORD,
-    pub dwEventState: DWORD,
-    pub cbAtr: DWORD,
-    pub rgbAtr: [c_uchar; MAX_ATR_SIZE],
-}
-
-pub type LPSCARD_READERSTATE = *mut SCARD_READERSTATE;
-
-#[repr(C)]
-pub struct SCARD_IO_REQUEST {
-    pub dwProtocol: c_ulong,
-    pub cbPciLength: c_ulong,
-}
-
-pub type PSCARD_IO_REQUEST = *mut SCARD_IO_REQUEST;
-pub type LPSCARD_IO_REQUEST = *mut SCARD_IO_REQUEST;
-pub type LPCSCARD_IO_REQUEST = *const SCARD_IO_REQUEST;
 
 pub const SCARD_S_SUCCESS: LONG                 = 0x00000000;
 pub const SCARD_F_INTERNAL_ERROR: LONG          = 0x80100001;
@@ -198,7 +258,49 @@ pub const SCARD_ATR_LENGTH: usize = MAX_ATR_SIZE;
 pub const MAX_BUFFER_SIZE: usize = 264;
 pub const MAX_BUFFER_SIZE_EXTENDED: usize = (4 + 3 + (1<<16) + 3 + 2);
 
-extern {
+pub const TAG_IFD_ATR: DWORD                         = 0x0303;
+pub const TAG_IFD_SLOTNUM: DWORD                     = 0x0180;
+pub const TAG_IFD_SLOT_THREAD_SAFE: DWORD            = 0x0fac;
+pub const TAG_IFD_THREAD_SAFE: DWORD                 = 0x0fad;
+pub const TAG_IFD_SLOTS_NUMBER: DWORD                = 0x0fae;
+pub const TAG_IFD_SIMULTANEOUS_ACCESS: DWORD         = 0x0faf;
+pub const TAG_IFD_POLLING_THREAD: DWORD              = 0x0fb0;
+pub const TAG_IFD_POLLING_THREAD_KILLABLE: DWORD     = 0x0fb1;
+pub const TAG_IFD_STOP_POLLING_THREAD: DWORD         = 0x0fb2;
+pub const TAG_IFD_POLLING_THREAD_WITH_TIMEOUT: DWORD = 0x0fb3;
+
+pub const IFD_HVERSION_1_0: DWORD = 0x00010000;
+pub const IFD_HVERSION_2_0: DWORD = 0x00020000;
+pub const IFD_HVERSION_3_0: DWORD = 0x00030000;
+
+pub const IFD_POWER_UP: DWORD   = 500;
+pub const IFD_POWER_DOWN: DWORD = 501;
+pub const IFD_RESET: DWORD      = 502;
+
+pub const IFD_NEGOTIATE_PTS1: UCHAR = 1;
+pub const IFD_NEGOTIATE_PTS2: UCHAR = 2;
+pub const IFD_NEGOTIATE_PTS3: UCHAR = 4;
+
+pub const IFD_SUCCESS: RESPONSECODE                   =   0;
+pub const IFD_ERROR_TAG: RESPONSECODE                 = 600;
+pub const IFD_ERROR_SET_FAILURE: RESPONSECODE         = 601;
+pub const IFD_ERROR_VALUE_READ_ONLY: RESPONSECODE     = 602;
+pub const IFD_ERROR_PTS_FAILURE: RESPONSECODE         = 605;
+pub const IFD_ERROR_NOT_SUPPORTED: RESPONSECODE       = 606;
+pub const IFD_PROTOCOL_NOT_SUPPORTED: RESPONSECODE    = 607;
+pub const IFD_ERROR_POWER_ACTION: RESPONSECODE        = 608;
+pub const IFD_ERROR_SWALLOW: RESPONSECODE             = 609;
+pub const IFD_ERROR_EJECT: RESPONSECODE               = 610;
+pub const IFD_ERROR_CONFISCATE: RESPONSECODE          = 611;
+pub const IFD_COMMUNICATION_ERROR: RESPONSECODE       = 612;
+pub const IFD_RESPONSE_TIMEOUT: RESPONSECODE          = 613;
+pub const IFD_NOT_SUPPORTED: RESPONSECODE             = 614;
+pub const IFD_ICC_PRESENT: RESPONSECODE               = 615;
+pub const IFD_ICC_NOT_PRESENT: RESPONSECODE           = 616;
+pub const IFD_NO_SUCH_DEVICE: RESPONSECODE            = 617;
+pub const IFD_ERROR_INSUFFICIENT_BUFFER: RESPONSECODE = 618;
+
+extern "C" {
     pub static g_rgSCardT0Pci: SCARD_IO_REQUEST;
     pub static g_rgSCardT1Pci: SCARD_IO_REQUEST;
     pub static g_rgSCardRawPci: SCARD_IO_REQUEST;
@@ -221,5 +323,16 @@ extern {
     pub fn SCardCancel(hContext: SCARDCONTEXT) -> LONG;
     pub fn SCardGetAttrib(hCard: SCARDHANDLE, dwAttrId: DWORD, pbAttr: LPBYTE, pcbAttrLen: LPDWORD) -> LONG;
     pub fn SCardSetAttrib(hCard: SCARDHANDLE, dwAttrId: DWORD, pbAttr: LPCBYTE, pcbAttrLen: DWORD) -> LONG;
+
+    pub fn IFDHCreateChannelByName(Lun: DWORD, DeviceName: LPSTR) -> RESPONSECODE;
+    pub fn IFDHControl(Lun: DWORD, dwControlCode: DWORD, TxBuffer: PUCHAR, TxLength: DWORD, RxBuffer: PUCHAR, RxLength: DWORD, pdwBytesReturned: LPDWORD) -> RESPONSECODE;
+    pub fn IFDHCreateChannel(Lun: DWORD, Channel: DWORD) -> RESPONSECODE;
+    pub fn IFDHCloseChannel(Lun: DWORD) -> RESPONSECODE;
+    pub fn IFDHGetCapabilities(Lun: DWORD, Tag: DWORD, Length: PDWORD, Value: PUCHAR) -> RESPONSECODE;
+    pub fn IFDHSetCapabilities(Lun: DWORD, Tag: DWORD, Length: DWORD, Value: PUCHAR) -> RESPONSECODE;
+    pub fn IFDHSetProtocolParameters(Lun: DWORD, Protocol: DWORD, Flags: UCHAR, PTS1: UCHAR, PTS2: UCHAR, PTS3: UCHAR) -> RESPONSECODE;
+    pub fn IFDHPowerICC(Lun: DWORD, Action: DWORD, Atr: PUCHAR, AtrLength: PDWORD) -> RESPONSECODE;
+    pub fn IFDHTransmitToICC(Lun: DWORD, SendPci: SCARD_IO_HEADER, TxBuffer: PUCHAR, TxLength: DWORD, RxBuffer: PUCHAR, RxLength: PDWORD, RecvPci: PSCARD_IO_HEADER) -> RESPONSECODE;
+    pub fn IFDHICCPresence(Lun: DWORD) -> RESPONSECODE;
 }
 
