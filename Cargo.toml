@@ -1,0 +1,12 @@
+[package]
+name = "pcsclite-sys"
+version = "0.1.0"
+authors = ["Thomas Kerber <thomas@tkerber.org>"]
+links = "pcsclite"
+build = "build.rs"
+
+[dependencies]
+libc = "*"
+
+[build-dependencies]
+pkg-config = "*"
