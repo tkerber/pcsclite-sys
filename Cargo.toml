@@ -1,9 +1,12 @@
 [package]
 name = "pcsclite-sys"
+description = "FFI bindings for pcsclite."
 version = "0.1.0"
 authors = ["Thomas Kerber <thomas@tkerber.org>"]
 links = "pcsclite"
 build = "build.rs"
+repository = "https://github.com/tkerber/pcsclite-sys"
+license = "MIT"
 
 [dependencies]
 libc = "0.2"
