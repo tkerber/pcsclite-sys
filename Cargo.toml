@@ -6,7 +6,7 @@ links = "pcsclite"
 build = "build.rs"
 
 [dependencies]
-libc = "*"
+libc = "0.2"
 
 [build-dependencies]
-pkg-config = "*"
+pkg-config = "0.3"

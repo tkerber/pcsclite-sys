@@ -269,37 +269,6 @@ pub const TAG_IFD_POLLING_THREAD_KILLABLE: DWORD     = 0x0fb1;
 pub const TAG_IFD_STOP_POLLING_THREAD: DWORD         = 0x0fb2;
 pub const TAG_IFD_POLLING_THREAD_WITH_TIMEOUT: DWORD = 0x0fb3;
 
-pub const IFD_HVERSION_1_0: DWORD = 0x00010000;
-pub const IFD_HVERSION_2_0: DWORD = 0x00020000;
-pub const IFD_HVERSION_3_0: DWORD = 0x00030000;
-
-pub const IFD_POWER_UP: DWORD   = 500;
-pub const IFD_POWER_DOWN: DWORD = 501;
-pub const IFD_RESET: DWORD      = 502;
-
-pub const IFD_NEGOTIATE_PTS1: UCHAR = 1;
-pub const IFD_NEGOTIATE_PTS2: UCHAR = 2;
-pub const IFD_NEGOTIATE_PTS3: UCHAR = 4;
-
-pub const IFD_SUCCESS: RESPONSECODE                   =   0;
-pub const IFD_ERROR_TAG: RESPONSECODE                 = 600;
-pub const IFD_ERROR_SET_FAILURE: RESPONSECODE         = 601;
-pub const IFD_ERROR_VALUE_READ_ONLY: RESPONSECODE     = 602;
-pub const IFD_ERROR_PTS_FAILURE: RESPONSECODE         = 605;
-pub const IFD_ERROR_NOT_SUPPORTED: RESPONSECODE       = 606;
-pub const IFD_PROTOCOL_NOT_SUPPORTED: RESPONSECODE    = 607;
-pub const IFD_ERROR_POWER_ACTION: RESPONSECODE        = 608;
-pub const IFD_ERROR_SWALLOW: RESPONSECODE             = 609;
-pub const IFD_ERROR_EJECT: RESPONSECODE               = 610;
-pub const IFD_ERROR_CONFISCATE: RESPONSECODE          = 611;
-pub const IFD_COMMUNICATION_ERROR: RESPONSECODE       = 612;
-pub const IFD_RESPONSE_TIMEOUT: RESPONSECODE          = 613;
-pub const IFD_NOT_SUPPORTED: RESPONSECODE             = 614;
-pub const IFD_ICC_PRESENT: RESPONSECODE               = 615;
-pub const IFD_ICC_NOT_PRESENT: RESPONSECODE           = 616;
-pub const IFD_NO_SUCH_DEVICE: RESPONSECODE            = 617;
-pub const IFD_ERROR_INSUFFICIENT_BUFFER: RESPONSECODE = 618;
-
 extern "C" {
     pub static g_rgSCardT0Pci: SCARD_IO_REQUEST;
     pub static g_rgSCardT1Pci: SCARD_IO_REQUEST;
@@ -323,16 +292,38 @@ extern "C" {
     pub fn SCardCancel(hContext: SCARDCONTEXT) -> LONG;
     pub fn SCardGetAttrib(hCard: SCARDHANDLE, dwAttrId: DWORD, pbAttr: LPBYTE, pcbAttrLen: LPDWORD) -> LONG;
     pub fn SCardSetAttrib(hCard: SCARDHANDLE, dwAttrId: DWORD, pbAttr: LPCBYTE, pcbAttrLen: DWORD) -> LONG;
-
-    pub fn IFDHCreateChannelByName(Lun: DWORD, DeviceName: LPSTR) -> RESPONSECODE;
-    pub fn IFDHControl(Lun: DWORD, dwControlCode: DWORD, TxBuffer: PUCHAR, TxLength: DWORD, RxBuffer: PUCHAR, RxLength: DWORD, pdwBytesReturned: LPDWORD) -> RESPONSECODE;
-    pub fn IFDHCreateChannel(Lun: DWORD, Channel: DWORD) -> RESPONSECODE;
-    pub fn IFDHCloseChannel(Lun: DWORD) -> RESPONSECODE;
-    pub fn IFDHGetCapabilities(Lun: DWORD, Tag: DWORD, Length: PDWORD, Value: PUCHAR) -> RESPONSECODE;
-    pub fn IFDHSetCapabilities(Lun: DWORD, Tag: DWORD, Length: DWORD, Value: PUCHAR) -> RESPONSECODE;
-    pub fn IFDHSetProtocolParameters(Lun: DWORD, Protocol: DWORD, Flags: UCHAR, PTS1: UCHAR, PTS2: UCHAR, PTS3: UCHAR) -> RESPONSECODE;
-    pub fn IFDHPowerICC(Lun: DWORD, Action: DWORD, Atr: PUCHAR, AtrLength: PDWORD) -> RESPONSECODE;
-    pub fn IFDHTransmitToICC(Lun: DWORD, SendPci: SCARD_IO_HEADER, TxBuffer: PUCHAR, TxLength: DWORD, RxBuffer: PUCHAR, RxLength: PDWORD, RecvPci: PSCARD_IO_HEADER) -> RESPONSECODE;
-    pub fn IFDHICCPresence(Lun: DWORD) -> RESPONSECODE;
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use libc::c_void;
+
+    #[test]
+    fn test_linking() {
+        let _: Vec<*const c_void> = vec![
+            &g_rgSCardT0Pci as *const SCARD_IO_REQUEST as *const c_void,
+            &g_rgSCardT1Pci as *const SCARD_IO_REQUEST as *const c_void,
+            &g_rgSCardRawPci as *const SCARD_IO_REQUEST as *const c_void,
+            pcsc_stringify_error as *const c_void,
+            SCardEstablishContext as *const c_void,
+            SCardReleaseContext as *const c_void,
+            SCardIsValidContext as *const c_void,
+            SCardConnect as *const c_void,
+            SCardReconnect as *const c_void,
+            SCardDisconnect as *const c_void,
+            SCardBeginTransaction as *const c_void,
+            SCardEndTransaction as *const c_void,
+            SCardStatus as *const c_void,
+            SCardGetStatusChange as *const c_void,
+            SCardControl as *const c_void,
+            SCardTransmit as *const c_void,
+            SCardListReaderGroups as *const c_void,
+            SCardListReaders as *const c_void,
+            SCardFreeMemory as *const c_void,
+            SCardCancel as *const c_void,
+            SCardGetAttrib as *const c_void,
+            SCardSetAttrib as *const c_void,
+        ];
+    }
+}
