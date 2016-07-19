@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
+#![allow(overflowing_literals)]
 extern crate libc;
 use libc::{c_void, c_ulong, c_char, c_long, c_uchar, c_ushort, c_short};
 
@@ -273,7 +274,6 @@ extern "C" {
     pub static g_rgSCardT0Pci: SCARD_IO_REQUEST;
     pub static g_rgSCardT1Pci: SCARD_IO_REQUEST;
     pub static g_rgSCardRawPci: SCARD_IO_REQUEST;
-    pub fn pcsc_stringify_error(e: LONG) -> *mut c_char;
     pub fn SCardEstablishContext(dwScope: DWORD, pvReserved1: LPCVOID, pvResserved2: LPCVOID, phContext: LPSCARDCONTEXT) -> LONG;
     pub fn SCardReleaseContext(hContext: SCARDCONTEXT) -> LONG;
     pub fn SCardIsValidContext(hContext: SCARDCONTEXT) -> LONG;
@@ -293,6 +293,14 @@ extern "C" {
     pub fn SCardGetAttrib(hCard: SCARDHANDLE, dwAttrId: DWORD, pbAttr: LPBYTE, pcbAttrLen: LPDWORD) -> LONG;
     pub fn SCardSetAttrib(hCard: SCARDHANDLE, dwAttrId: DWORD, pbAttr: LPCBYTE, pcbAttrLen: DWORD) -> LONG;
 }
+
+#[cfg(windows)]
+pub fn pcsc_stringify_error(_: LONG) -> *const c_char {
+    "<error strings not implemented>\x00".as_ptr() as *const c_char
+}
+
+#[cfg(not(windows))]
+extern "C" { pub fn pcsc_stringify_error(e: LONG) -> *mut c_char; }
 
 #[cfg(test)]
 mod tests {
